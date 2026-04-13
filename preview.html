@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plop App Preview</title>
+  <style>
+    :root {
+      --bg: #1e1916;
+      --panel: #27211d;
+      --panel2: #312a25;
+      --line: #3a332d;
+      --text: #f7f0d8;
+      --muted: #b6aca0;
+      --yellow: #efb620;
+      --salmon: #ff826f;
+      --green: #38c172;
+      --danger: #ff4d4f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, #42352d, #0d0b0a 60%);
+      font-family: Arial, sans-serif;
+      color: var(--text);
+    }
+    .phone {
+      width: min(100vw, 430px);
+      min-height: 100vh;
+      background: var(--bg);
+      border: 1px solid #443b34;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .5);
+      padding: 18px 18px 96px;
+      position: relative;
+      overflow: hidden;
+    }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .row, .between, .tabs, .nav { display: flex; align-items: center; }
+    .between { justify-content: space-between; gap: 12px; }
+    .row { gap: 12px; }
+    .logo {
+      width: 54px; height: 54px; border-radius: 18px;
+      background: var(--yellow); color: #16120f;
+      display: grid; place-items: center; font-size: 28px; font-weight: 900;
+    }
+    .icon-btn {
+      width: 42px; height: 42px; border-radius: 14px; background: var(--panel2);
+      border: 1px solid var(--line); color: var(--text); cursor: pointer;
+    }
+    .title { margin: 0; font-size: 28px; font-weight: 900; }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; line-height: 1.45; }
+    .hero, .card, .stat, .setting, .item, .box {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+    }
+    .hero {
+      margin-top: 18px; padding: 18px;
+      background: linear-gradient(135deg, #ffd95b, var(--yellow));
+      color: #18130f;
+    }
+    .hero h2 { margin: 0; font-size: 34px; line-height: .96; font-weight: 900; }
+    .hero p { margin: 12px 0 0; line-height: 1.5; color: rgba(0, 0, 0, .78); font-size: 14px; }
+    .stats {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    .stat { background: var(--panel); padding: 14px 12px; }
+    .stat strong { display: block; font-size: 21px; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .card { margin-top: 18px; background: var(--panel); padding: 18px; }
+    .card h3 { margin: 0; font-size: 22px; font-weight: 800; }
+    .chart {
+      margin-top: 16px; height: 170px; background: #312a25; border-radius: 22px;
+      position: relative; overflow: hidden;
+    }
+    .gridline { position: absolute; left: 12px; right: 12px; height: 1px; background: #4a4038; }
+    .g1 { top: 42px; } .g2 { top: 84px; } .g3 { top: 126px; }
+    .chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .box { margin-top: 12px; padding: 14px; background: var(--panel2); border-radius: 18px; }
+    .box strong { display: block; font-size: 15px; }
+    .meta { color: var(--muted); font-size: 13px; line-height: 1.45; margin-top: 4px; }
+    .item {
+      margin-top: 12px; background: var(--panel2); padding: 14px; display: flex; gap: 12px;
+    }
+    .badge {
+      width: 48px; height: 48px; border-radius: 16px; background: var(--yellow); color: #1a140f;
+      display: grid; place-items: center; font-weight: 900; font-size: 20px; flex: none;
+    }
+    .chips, .grid, .selector { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .selector { overflow-x: auto; flex-wrap: nowrap; }
+    .chip {
+      border-radius: 999px; padding: 6px 9px; font-size: 12px; font-weight: 700;
+      background: #1d2831; color: #d8dde1;
+    }
+    .chip.accent { background: rgba(239, 182, 32, .14); color: #ffdb72; }
+    .shape, .tag, .tab {
+      font-size: 12px; font-weight: 700; border-radius: 999px; cursor: pointer;
+    }
+    .shape {
+      min-width: 52px; height: 52px; border: 1px solid #d8cdbd; background: #f1eadc;
+      color: #1d1713;
+    }
+    .shape.active, .tag.active, .tab.active { background: var(--yellow); border-color: var(--yellow); color: #1a140f; }
+    .tag {
+      padding: 10px 12px; border: 1px solid #d8cdbd; background: #f1eadc; color: #5d5347;
+    }
+    .tabs { margin-top: 16px; gap: 8px; }
+    .tab {
+      padding: 10px 14px; border: 1px solid var(--line); background: var(--panel2); color: var(--muted);
+    }
+    .field { margin-top: 14px; }
+    label { display: block; margin-bottom: 8px; color: var(--muted); font-size: 13px; }
+    input {
+      width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line);
+      background: #1c2226; color: var(--text); font: inherit;
+    }
+    .cta, .soft {
+      border-radius: 18px; padding: 14px 16px; font: inherit; font-weight: 800; cursor: pointer;
+    }
+    .cta { width: 100%; margin-top: 18px; background: var(--yellow); color: #1a140f; border: 0; }
+    .soft { background: var(--panel2); color: var(--text); border: 1px solid var(--line); }
+    .bars { margin-top: 16px; display: grid; gap: 12px; }
+    .bar-row { display: grid; grid-template-columns: 70px 1fr 26px; gap: 10px; align-items: center; font-size: 13px; }
+    .track { height: 10px; background: #17130f; border-radius: 999px; overflow: hidden; }
+    .fill { height: 100%; background: var(--yellow); }
+    .fill.good { background: var(--green); }
+    .section-title { margin-top: 20px; font-size: 16px; font-weight: 800; }
+    .setting {
+      margin-top: 10px; background: var(--panel2); padding: 15px 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .setting-left { display: flex; gap: 12px; align-items: center; }
+    .setting-icon {
+      width: 28px; height: 28px; border-radius: 10px; background: rgba(239, 182, 32, .12);
+      color: var(--yellow); display: grid; place-items: center; font-weight: 900; flex: none;
+    }
+    .lock { color: #ff8376; font-weight: 800; font-size: 13px; }
+    .danger { color: var(--danger); font-weight: 800; }
+    .floating {
+      position: absolute; left: 50%; bottom: 78px; transform: translateX(-50%);
+      width: 42px; height: 42px; border-radius: 16px; background: var(--yellow); color: #18130f;
+      display: grid; place-items: center; font-size: 26px; font-weight: 900; cursor: pointer; z-index: 5;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, .25);
+    }
+    .nav {
+      position: sticky; bottom: 0; margin: 18px -18px -96px; padding: 12px 14px 16px;
+      background: linear-gradient(to top, #1a1512, rgba(26, 21, 18, .96)); gap: 8px;
+    }
+    .nav-item {
+      flex: 1; text-align: center; padding: 10px 4px; border-radius: 16px; color: #cfc5bb; font-size: 12px; cursor: pointer;
+    }
+    .nav-item.active { background: var(--yellow); color: #1a140f; font-weight: 900; }
+    .overlay {
+      position: absolute; inset: 0; background: rgba(10, 8, 7, .74); padding: 18px; display: none; align-items: flex-end; z-index: 20;
+    }
+    .overlay.active { display: flex; }
+    .sheet {
+      width: 100%; max-height: 82vh; overflow: auto; background: #221c18; border: 1px solid #54483f; border-radius: 28px; padding: 18px;
+    }
+    .check-list { margin: 16px 0 0; padding: 0; list-style: none; display: grid; gap: 12px; }
+    .check-list li::before { content: "✓"; color: #ff9a8f; font-weight: 900; margin-right: 10px; }
+    .plan { border: 2px solid #7a6658; border-radius: 20px; padding: 14px; cursor: pointer; margin-top: 12px; }
+    .plan.active { border-color: var(--salmon); }
+    .plan-badge {
+      float: right; background: rgba(255, 130, 111, .18); color: #ffb4a9;
+      border-radius: 999px; padding: 4px 9px; font-size: 11px; font-weight: 800;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <main class="phone">
+    <section id="screen-home" class="screen active">
+      <div class="row">
+        <div class="logo">P</div>
+        <div>
+          <h1 class="title" style="font-size:24px;">plop 便便日記</h1>
+          <p class="subtitle">追蹤、分析與回顧腸道健康</p>
+        </div>
+      </div>
+      <section class="hero">
+        <h2>腸道健康總覽</h2>
+        <p>依照文章截圖補上首頁分析、紀錄列表、洞察頁、進階功能鎖定、因素編輯、CSV 匯出與資料管理。</p>
+      </section>
+      <section class="stats">
+        <div class="stat"><strong id="stat-total">2</strong><span>累計紀錄</span></div>
+        <div class="stat"><strong id="stat-gap">18h</strong><span>平均間隔</span></div>
+        <div class="stat"><strong id="stat-good">100%</strong><span>健康形狀</span></div>
+      </section>
+      <section class="card">
+        <h3>排便分析</h3>
+        <p class="subtitle">近 7 天趨勢與快速洞察</p>
+        <div class="chart">
+          <div class="gridline g1"></div>
+          <div class="gridline g2"></div>
+          <div class="gridline g3"></div>
+          <svg viewBox="0 0 340 170" preserveAspectRatio="none" aria-hidden="true">
+            <polyline fill="none" stroke="#38c172" stroke-width="3" points="20,118 70,108 120,92 170,122 220,126 270,110 320,58"></polyline>
+            <g fill="#38c172">
+              <circle cx="20" cy="118" r="4"></circle>
+              <circle cx="70" cy="108" r="4"></circle>
+              <circle cx="120" cy="92" r="4"></circle>
+              <circle cx="170" cy="122" r="4"></circle>
+              <circle cx="220" cy="126" r="4"></circle>
+              <circle cx="270" cy="110" r="4"></circle>
+              <circle cx="320" cy="58" r="4"></circle>
+            </g>
+          </svg>
+        </div>
+        <div class="box">
+          <strong id="insight-count">過去 7 天你紀錄了 2 次</strong>
+          <div class="meta">相較於更早前的 7 天區間為 0 次。</div>
+        </div>
+        <div class="box">
+          <strong id="insight-good">過去 7 天有 100% 的健康形狀</strong>
+          <div class="meta">建議持續追蹤頻率、顏色、形狀與觸發因素。</div>
+        </div>
+      </section>
+      <section class="card">
+        <h3>最新紀錄</h3>
+        <p class="subtitle">對照文章截圖的卡片式事件列表</p>
+        <div id="home-entries"></div>
+      </section>
+    </section>
+
+    <section id="screen-log" class="screen">
+      <div class="between">
+        <div>
+          <h1 class="title">紀錄</h1>
+          <p class="subtitle">記錄形狀、顏色、症狀、因素與備註</p>
+        </div>
+        <button class="icon-btn" id="open-guide">?</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-log-tab="editor">編輯</button>
+        <button class="tab" data-log-tab="list">列表</button>
+      </div>
+      <div id="log-editor">
+        <section class="card">
+          <h3>Bristol 類型</h3>
+          <p class="subtitle" id="shape-caption">第 4 型最接近健康基準。</p>
+          <div class="selector" id="shape-selector"></div>
+          <div class="field">
+            <label for="color">顏色</label>
+            <input id="color" value="棕色">
+          </div>
+          <div class="field">
+            <label>症狀</label>
+            <div class="grid" id="symptom-tags"></div>
+          </div>
+          <div class="field">
+            <label>因素</label>
+            <div class="grid" id="factor-tags"></div>
+          </div>
+          <div class="field">
+            <label for="note">備註</label>
+            <input id="note" value="量正常">
+          </div>
+          <button class="cta" id="save-log">儲存紀錄</button>
+        </section>
+      </div>
+      <div id="log-list" class="hidden">
+        <section class="card">
+          <h3>列表檢視</h3>
+          <p class="subtitle">時間軸風格的紀錄頁</p>
+          <div id="list-entries"></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="screen-insights" class="screen">
+      <div class="between">
+        <div>
+          <h1 class="title">洞察</h1>
+          <p class="subtitle">每日頻率與時間分布</p>
+        </div>
+        <button class="icon-btn" id="open-upgrade-short">★</button>
+      </div>
+      <section class="card">
+        <h3>類型分布</h3>
+        <p class="subtitle">依目前已儲存的紀錄即時更新</p>
+        <div class="bars" id="type-bars"></div>
+      </section>
+      <section class="card">
+        <h3>時間分布</h3>
+        <p class="subtitle">參考截圖的時段分析摘要</p>
+        <div class="box">
+          <strong id="time-distribution">多數紀錄發生在上午 9 點到中午 12 點</strong>
+          <div class="meta">這裡用摘要卡模擬文章裡的進階時段圖表。</div>
+        </div>
+      </section>
+    </section>
+
+    <section id="screen-reports" class="screen">
+      <div>
+        <h1 class="title">報告</h1>
+        <p class="subtitle">分享給醫師與照護者</p>
+      </div>
+      <section class="card">
+        <h3>匯出中心</h3>
+        <p class="subtitle">PDF 摘要與 CSV 紀錄</p>
+        <div class="box">
+          <strong>plop-monthly-report.pdf</strong>
+          <div class="meta">包含類型、顏色、症狀、因素、備註與趨勢摘要。</div>
+        </div>
+        <div class="box">
+          <strong>plop-records.csv</strong>
+          <div class="meta">原始紀錄匯出，對應截圖中的 CSV 分享流程。</div>
+        </div>
+        <div class="tabs">
+          <button class="soft" id="export-pdf">匯出 PDF</button>
+          <button class="soft" id="export-csv">匯出 CSV</button>
+        </div>
+      </section>
+    </section>
+    <section id="screen-settings" class="screen">
+      <div class="between">
+        <div>
+          <h1 class="title">設定</h1>
+          <p class="subtitle">客服支援、進階功能鎖定、應用選項與資料工具</p>
+        </div>
+        <button class="icon-btn" id="open-upgrade">★</button>
+      </div>
+      <div class="section-title">客服支援</div>
+      <div class="setting">
+        <div class="setting-left"><div class="setting-icon">@</div><div>聯絡我們</div></div>
+        <div>&gt;</div>
+      </div>
+      <div class="setting" id="open-export-sheet">
+        <div class="setting-left"><div class="setting-icon">↓</div><div>匯出紀錄 (CSV)</div></div>
+        <div>&gt;</div>
+      </div>
+      <div class="setting" id="open-data-manager">
+        <div class="setting-left"><div class="setting-icon">#</div><div>資料管理</div></div>
+        <div>&gt;</div>
+      </div>
+      <div class="setting">
+        <div class="setting-left"><div class="setting-icon">★</div><div>給我們評分</div></div>
+        <div>&gt;</div>
+      </div>
+
+      <div class="section-title">進階功能</div>
+      <div class="setting" id="edit-factors">
+        <div class="setting-left"><div class="setting-icon">+</div><div>編輯因素</div></div>
+        <div>&gt;</div>
+      </div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">N</div><div>顯示備註</div></div><div class="lock">LOCK</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">P</div><div>顯示照片</div></div><div class="lock">LOCK</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">C</div><div>日曆類型檢視</div></div><div class="lock">LOCK</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">G</div><div>圖表類型檢視</div></div><div class="lock">LOCK</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">B</div><div>備份與還原</div></div><div class="lock">LOCK</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">D</div><div>匯出 PDF</div></div><div class="lock">LOCK</div></div>
+
+      <div class="section-title">應用選項</div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">M</div><div>主題</div></div><div>系統</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">L</div><div>語言</div></div><div>繁中</div></div>
+      <div class="setting"><div class="setting-left"><div class="setting-icon">W</div><div>每週起始日</div></div><div>週日</div></div>
+    </section>
+
+    <div class="floating" id="quick-add">+</div>
+    <nav class="nav">
+      <div class="nav-item active" data-screen="home">首頁</div>
+      <div class="nav-item" data-screen="log">紀錄</div>
+      <div class="nav-item" data-screen="insights">洞察</div>
+      <div class="nav-item" data-screen="reports">報告</div>
+      <div class="nav-item" data-screen="settings">設定</div>
+    </nav>
+
+    <div class="overlay" id="guide-overlay">
+      <div class="sheet">
+        <div class="between">
+          <h3 style="margin:0;font-size:22px;">從預設因素開始</h3>
+          <button class="icon-btn" data-close="guide-overlay">x</button>
+        </div>
+        <p class="subtitle">文章中的引導畫面會先介紹內建因素，之後再讓你自訂自己的追蹤項目。</p>
+        <div class="box">
+          <strong>最近事件</strong>
+          <div class="meta">上一筆排便摘要卡</div>
+        </div>
+        <button class="cta" data-close="guide-overlay">開始使用</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="upgrade-overlay">
+      <div class="sheet">
+        <div class="between">
+          <h3 style="margin:0;font-size:22px;">解鎖個人化追蹤、洞察與報告</h3>
+          <button class="icon-btn" data-close="upgrade-overlay">x</button>
+        </div>
+        <ul class="check-list">
+          <li>移除廣告</li>
+          <li>自訂追蹤項目</li>
+          <li>同步多台裝置</li>
+          <li>跨平台同步</li>
+          <li>詳細圖表與趨勢分析</li>
+          <li>每月回顧</li>
+          <li>匯出 PDF</li>
+          <li>雲端備份</li>
+          <li>附加照片</li>
+        </ul>
+        <div id="plans"></div>
+        <button class="cta" data-close="upgrade-overlay">下一步</button>
+      </div>
+    </div>
+
+    <div class="overlay" id="data-overlay">
+      <div class="sheet">
+        <div class="between">
+          <h3 style="margin:0;font-size:22px;">資料管理</h3>
+          <button class="icon-btn" data-close="data-overlay">x</button>
+        </div>
+        <section class="stats">
+          <div class="stat"><strong id="mgr-days">1</strong><span>追蹤天數</span></div>
+          <div class="stat"><strong id="mgr-total">2</strong><span>總排便次數</span></div>
+          <div class="stat"><strong id="mgr-avg">1.00</strong><span>每日平均</span></div>
+        </section>
+        <div class="card" style="padding:16px;">
+          <h3 style="font-size:18px;">刪除所有紀錄</h3>
+          <p class="subtitle">清除所有紀錄、因素、備份、備註與照片。</p>
+          <p class="danger">刪除</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay" id="export-overlay">
+      <div class="sheet">
+        <div class="between">
+          <h3 style="margin:0;font-size:22px;">分享面板</h3>
+          <button class="icon-btn" data-close="export-overlay">x</button>
+        </div>
+        <div class="box">
+          <strong>文字與 1 個檔案</strong>
+          <div class="meta">AirDrop、訊息、郵件、備忘錄、儲存到檔案。</div>
+        </div>
+        <button class="cta" data-close="export-overlay">完成</button>
+      </div>
+    </div>
+  </main>
+  <script>
+    const state = {
+      screen: 'home',
+      logTab: 'editor',
+      selectedShape: 4,
+      selectedPlan: 'yearly',
+      symptoms: new Set(['量正常', '便意強烈']),
+      factors: new Set(['咖啡', '排便中斷']),
+      symptomOptions: ['量正常', '量偏少', '便意強烈', '脹氣', '腹脹', '疼痛'],
+      factorOptions: ['咖啡', '壓力', '晚餐太晚', '排便中斷', '辛辣食物', '睡眠不足'],
+      entries: [
+        { day: '今天', time: '18:00', shape: 4, color: '棕色', symptoms: ['量正常', '便意強烈'], factors: ['咖啡'], note: '1-3 分鐘' },
+        { day: '昨天', time: '09:20', shape: 5, color: '淺棕色', symptoms: ['量偏少'], factors: ['壓力'], note: '比平常更軟' }
+      ]
+    };
+
+    const plans = [
+      { id: 'yearly', title: '每年', price: '$880 / 年', detail: '免費試用 1 週', badge: '省 19%' },
+      { id: 'half', title: '6 個月', price: '$360 / 6 個月', detail: '$60 / 月', badge: '省 33%' },
+      { id: 'monthly', title: '每月', price: '$90 / 月', detail: '每月續訂', badge: '' }
+    ];
+
+    const captions = {
+      1: '第 1 型：硬顆粒，常見於便秘。',
+      2: '第 2 型：結塊香腸狀，偏乾偏慢。',
+      3: '第 3 型：表面有裂紋，略硬。',
+      4: '第 4 型：平滑香腸狀，理想基準。',
+      5: '第 5 型：柔軟小塊，仍可接受。',
+      6: '第 6 型：糊狀，可能伴隨急迫感。',
+      7: '第 7 型：水狀，偏向腹瀉。'
+    };
+
+    function renderEntries(target, items) {
+      document.getElementById(target).innerHTML = items.map(entry => `
+        <div class="item">
+          <div class="badge">${entry.shape}</div>
+          <div>
+            <strong>${entry.day} ${entry.time}</strong>
+            <div class="meta">${entry.color} · ${entry.note}</div>
+            <div class="chips">
+              ${entry.symptoms.map(v => `<span class="chip">${v}</span>`).join('')}
+              ${entry.factors.map(v => `<span class="chip accent">${v}</span>`).join('')}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderShapes() {
+      document.getElementById('shape-selector').innerHTML = Array.from({ length: 7 }, (_, i) => {
+        const n = i + 1;
+        return `<button class="shape ${state.selectedShape === n ? 'active' : ''}" data-shape="${n}">${n}</button>`;
+      }).join('');
+      document.getElementById('shape-caption').textContent = captions[state.selectedShape];
+      document.querySelectorAll('.shape').forEach(node => {
+        node.addEventListener('click', () => {
+          state.selectedShape = Number(node.dataset.shape);
+          renderShapes();
+        });
+      });
+    }
+
+    function renderTags(id, options, selected) {
+      document.getElementById(id).innerHTML = options.map(label => `
+        <button class="tag ${selected.has(label) ? 'active' : ''}" data-target="${id}" data-label="${label}">${label}</button>
+      `).join('');
+    }
+
+    function bindTags() {
+      document.querySelectorAll('.tag').forEach(node => {
+        node.addEventListener('click', () => {
+          const setRef = node.dataset.target === 'symptom-tags' ? state.symptoms : state.factors;
+          const label = node.dataset.label;
+          if (setRef.has(label)) setRef.delete(label); else setRef.add(label);
+          renderTags('symptom-tags', state.symptomOptions, state.symptoms);
+          renderTags('factor-tags', state.factorOptions, state.factors);
+          bindTags();
+        });
+      });
+    }
+
+    function renderBars() {
+      const counts = Array.from({ length: 7 }, (_, i) => i + 1).map(type => state.entries.filter(entry => entry.shape === type).length);
+      const max = Math.max(...counts, 1);
+      document.getElementById('type-bars').innerHTML = counts.map((count, i) => `
+        <div class="bar-row">
+          <span>第 ${i + 1} 型</span>
+          <div class="track"><div class="fill ${i === 3 ? 'good' : ''}" style="width:${(count / max) * 100}%"></div></div>
+          <span>${count}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderPlans() {
+      document.getElementById('plans').innerHTML = plans.map(plan => `
+        <div class="plan ${state.selectedPlan === plan.id ? 'active' : ''}" data-plan="${plan.id}">
+          ${plan.badge ? `<span class="plan-badge">${plan.badge}</span>` : ''}
+          <strong>${plan.title}</strong>
+          <div class="meta">${plan.price}</div>
+          <div class="meta">${plan.detail}</div>
+        </div>
+      `).join('');
+      document.querySelectorAll('.plan').forEach(node => {
+        node.addEventListener('click', () => {
+          state.selectedPlan = node.dataset.plan;
+          renderPlans();
+        });
+      });
+    }
+
+    function renderStats() {
+      const total = state.entries.length;
+      const good = state.entries.filter(entry => entry.shape === 4 || entry.shape === 5).length;
+      const pct = Math.round((good / Math.max(total, 1)) * 100);
+      document.getElementById('stat-total').textContent = String(total);
+      document.getElementById('stat-good').textContent = `${pct}%`;
+      document.getElementById('insight-count').textContent = `過去 7 天你紀錄了 ${total} 次`;
+      document.getElementById('insight-good').textContent = `過去 7 天有 ${pct}% 的健康形狀`;
+      document.getElementById('mgr-total').textContent = String(total);
+      document.getElementById('mgr-avg').textContent = (total / 2).toFixed(2);
+    }
+
+    function switchScreen(name) {
+      state.screen = name;
+      document.querySelectorAll('.screen').forEach(node => node.classList.remove('active'));
+      document.getElementById(`screen-${name}`).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(node => node.classList.toggle('active', node.dataset.screen === name));
+    }
+
+    function switchLogTab(name) {
+      state.logTab = name;
+      document.querySelectorAll('[data-log-tab]').forEach(node => node.classList.toggle('active', node.dataset.logTab === name));
+      document.getElementById('log-editor').classList.toggle('hidden', name !== 'editor');
+      document.getElementById('log-list').classList.toggle('hidden', name !== 'list');
+    }
+
+    function openOverlay(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeOverlay(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    function saveLog() {
+      const color = document.getElementById('color').value || '棕色';
+      const note = document.getElementById('note').value || '量正常';
+      state.entries.unshift({
+        day: '今天',
+        time: '剛剛',
+        shape: state.selectedShape,
+        color,
+        symptoms: Array.from(state.symptoms),
+        factors: Array.from(state.factors),
+        note
+      });
+      renderAll();
+      switchScreen('home');
+    }
+
+    function addFactor() {
+      const value = window.prompt('新增自訂因素');
+      if (!value) return;
+      if (!state.factorOptions.includes(value)) state.factorOptions.push(value);
+      state.factors.add(value);
+      renderTags('factor-tags', state.factorOptions, state.factors);
+      bindTags();
+    }
+
+    function exportCsv() {
+      const csv = [
+        ['日期', '時間', '類型', '顏色', '症狀', '因素', '備註'].join(','),
+        ...state.entries.map(entry => [
+          entry.day, entry.time, entry.shape, entry.color,
+          `"${entry.symptoms.join('|')}"`,
+          `"${entry.factors.join('|')}"`,
+          `"${entry.note}"`
+        ].join(','))
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'plop-records.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      openOverlay('export-overlay');
+    }
+
+    function renderAll() {
+      renderEntries('home-entries', state.entries.slice(0, 4));
+      renderEntries('list-entries', state.entries);
+      renderShapes();
+      renderTags('symptom-tags', state.symptomOptions, state.symptoms);
+      renderTags('factor-tags', state.factorOptions, state.factors);
+      bindTags();
+      renderBars();
+      renderPlans();
+      renderStats();
+    }
+
+    document.querySelectorAll('.nav-item').forEach(node => node.addEventListener('click', () => switchScreen(node.dataset.screen)));
+    document.querySelectorAll('[data-log-tab]').forEach(node => node.addEventListener('click', () => switchLogTab(node.dataset.logTab)));
+    document.querySelectorAll('[data-close]').forEach(node => node.addEventListener('click', () => closeOverlay(node.dataset.close)));
+    document.getElementById('quick-add').addEventListener('click', () => switchScreen('log'));
+    document.getElementById('open-guide').addEventListener('click', () => openOverlay('guide-overlay'));
+    document.getElementById('open-upgrade').addEventListener('click', () => openOverlay('upgrade-overlay'));
+    document.getElementById('open-upgrade-short').addEventListener('click', () => openOverlay('upgrade-overlay'));
+    document.getElementById('open-export-sheet').addEventListener('click', exportCsv);
+    document.getElementById('open-data-manager').addEventListener('click', () => openOverlay('data-overlay'));
+    document.getElementById('edit-factors').addEventListener('click', addFactor);
+    document.getElementById('save-log').addEventListener('click', saveLog);
+    document.getElementById('export-csv').addEventListener('click', exportCsv);
+    document.getElementById('export-pdf').addEventListener('click', () => openOverlay('upgrade-overlay'));
+
+    renderAll();
+  </script>
+</body>
+</html>
