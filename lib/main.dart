@@ -171,9 +171,10 @@ chmod +x /usr/local/bin/update_ips.sh
 mkdir -p /etc/nftables
 cat << 'EOF' > /etc/nftables.conf
 flush ruleset
-include "/etc/nftables/country_ips.nft"
 
 table inet filter {
+    include "/etc/nftables/country_ips.nft"
+
     chain input {
         type filter hook input priority 0; policy drop;
         iifname "lo" accept
