@@ -714,6 +714,13 @@ echo "\u90e8\u7f72\u5b8c\u6210\uff01"''';
   }
 
   List<String> _buildCountryPortRules() {
+    if (_allowAllPorts) {
+      return _buildProtocolRules(
+        destination: '0-65535',
+        protocol: _allPortsProtocol,
+      );
+    }
+
     final rules = <String>{};
 
     if (_allowSsh) {
@@ -735,15 +742,6 @@ echo "\u90e8\u7f72\u5b8c\u6210\uff01"''';
         _buildProtocolRules(
           destination: '{ ${customPorts.join(', ')} }',
           protocol: _customPortsProtocol,
-        ),
-      );
-    }
-
-    if (_allowAllPorts) {
-      rules.addAll(
-        _buildProtocolRules(
-          destination: '0-65535',
-          protocol: _allPortsProtocol,
         ),
       );
     }
