@@ -1,74 +1,90 @@
 # nftables-geo-builder
 
-A single-page Flutter app that generates Linux `nftables` deployment scripts for country-based IP allowlists.
+這是一個使用 Flutter 製作的單頁應用程式，用來產生 Linux `nftables` 的國家 IP 白名單部署腳本。
 
-The UI lets you choose:
+使用者可以透過介面設定：
 
-- target country allowlist: `tw`, `jp`, `us`
-- admin fixed IP allowlist
-- SSH allow
-- HTTP/HTTPS allow
-- allow all ports
-- custom ports
-- protocol selection for web traffic, custom ports, and full-open rules
+- 目標國家 IP 白名單：`tw`、`jp`、`us`
+- 管理員固定 IP 白名單
+- 是否允許 SSH
+- 是否允許 HTTP / HTTPS
+- 是否開放所有 Port
+- 自訂開放通訊埠
+- HTTP/HTTPS、自訂 Port、全開 Port 的協定選擇（TCP / UDP / both）
 
-The app instantly generates a Bash deployment script that:
+系統會即時產生一段可直接部署到 Linux 伺服器的 Bash 腳本。
 
-- disables `firewalld` and `ufw`
-- downloads country IP ranges from `IPdeny`
-- writes `/etc/nftables/country_ips.nft`
-- writes `/etc/nftables.conf`
-- registers a cron job to refresh country IP ranges daily
-- enables `nftables`
+## 專案功能
 
-## Tech Stack
+產生的腳本會自動完成以下工作：
+
+- 關閉舊版防火牆服務 `firewalld` 與 `ufw`
+- 從 `IPdeny` 下載指定國家的 IPv4 CIDR 清單
+- 生成 `/etc/nftables/country_ips.nft`
+- 生成 `/etc/nftables.conf`
+- 註冊每日更新國家 IP 清單的排程
+- 啟用 `nftables`
+
+## 技術棧
 
 - Flutter
 - Dart 3
 - Material 3
-- Web and desktop-ready project structure
+- 支援 Web 與 Desktop 的專案結構
 
-## Run Locally
+## 本機啟動方式
 
-1. Install Flutter.
-2. Open this project folder.
-3. Run:
+1. 安裝 Flutter SDK
+2. 開啟本專案資料夾
+3. 執行：
 
 ```bash
 flutter pub get
 flutter run -d chrome
 ```
 
-If your environment uses a local Flutter SDK path instead of PATH, run the SDK directly, for example:
+如果你的環境沒有把 Flutter 加進 PATH，也可以直接指定 SDK 路徑，例如：
 
 ```powershell
 C:\Users\User\Documents\flutter_sdk_plain\bin\flutter.bat run -d chrome
 ```
 
-## What The Script Does
+## 腳本運作流程
 
-Generated scripts follow this flow:
+產生的腳本會依照以下順序執行：
 
-1. Disable old firewall services.
-2. Download the selected country's IPv4 CIDR list from `https://www.ipdeny.com/ipblocks/data/countries/<country>.zone`.
-3. Convert that list into an `nftables` set named `allow_ips`.
-4. Apply rules that only allow traffic from the country allowlist and any optional admin IP allowlist.
-5. Refresh the country list daily with cron.
+1. 關閉舊的防火牆服務
+2. 從 `https://www.ipdeny.com/ipblocks/data/countries/<country>.zone` 下載指定國家的 IPv4 CIDR 清單
+3. 轉換成 `nftables` 的 `allow_ips` 集合
+4. 套用只允許國家白名單與可選管理員固定 IP 的規則
+5. 註冊每日排程，定期更新國家 IP 清單
 
-## Important Notes
+## GitHub Pages
 
-- Country IP allowlists are geoblocking helpers, not perfect geolocation controls.
-- VPNs, proxies, cloud providers, and IP allocation quirks can still affect access behavior.
-- If you do not set an admin fixed IP, you may lock yourself out of SSH.
-- SSH normally uses TCP only. Be careful when opening UDP broadly.
+本專案包含 GitHub Pages 自動部署 workflow：
 
-## Verification
+- push 到 `main` 後，GitHub Actions 會自動 build Flutter Web
+- 使用官方 Pages workflow 自動部署站點
 
-Current project checks used during development:
+預設站點網址：
+
+- `https://sos19941015.github.io/nftables-geo-builder/`
+
+## 重要注意事項
+
+- 國家 IP 白名單屬於 geoblocking 輔助方案，不能視為百分之百精準的地理位置判定。
+- VPN、Proxy、雲端服務商出口 IP、跨境 ISP 都可能影響封鎖結果。
+- 如果沒有設定管理員固定 IP，部署後有可能把自己鎖在 SSH 外面。
+- SSH 正常情況下通常只需要 TCP，不建議不必要地開放 UDP。
+- `nftables` 的 `set allow_ips` 必須在正確的 table scope 中載入，因此目前產生的腳本已將 `include "/etc/nftables/country_ips.nft"` 放在 `table inet filter { ... }` 內。
+
+## 驗證方式
+
+目前開發過程中使用過的檢查方式：
 
 - `flutter analyze`
 - `flutter test`
 
-## License
+## 授權
 
-No license has been added yet.
+目前尚未加入 License。
